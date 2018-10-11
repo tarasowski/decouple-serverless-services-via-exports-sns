@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Producer Module: Decoupling of Services via Exports and SNS'
+Globals:
+  Function:
+    Runtime: nodejs8.10
+    Timeout: 3
+Outputs:
+  EventProducerFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - EventProducer
+      - Arn
+  EventProducerFunctionIamRole:
+    Description: Implicit IAM Role created for Hello World function
+    Value:
+      Fn::GetAtt:
+      - EventProducer
+      - Arn
+  ProducerApi:
+    Description: API Gateway endpoint URL for Prod stage for Event Producer function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/
+  SNSTopic:
+    Description: This is the sns topic that lambda from another stack should subscribe
+      to
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-snsTopic
+    Value:
+      Ref: SNSTopic
+Resources:
+  EventProducer:
+    Properties:
+      CodeUri: s3://sns-test-bucket-delete/5abaa2d67607e8493f165827047badbf
+      Environment:
+        Variables:
+          SNS_TOPIC:
+            Ref: SNSTopic
+      Events:
+        HelloWorld:
+          Properties:
+            Method: get
+            Path: /hello
+          Type: Api
+      Handler: app.lambdaHandler
+      Policies:
+      - Statement:
+        - Action:
+          - sns:Publish
+          Effect: Allow
+          Resource:
+            Ref: SNSTopic
+        Version: 2012-10-17
+    Type: AWS::Serverless::Function
+  SNSTopic:
+    Type: AWS::SNS::Topic
+Transform: AWS::Serverless-2016-10-31

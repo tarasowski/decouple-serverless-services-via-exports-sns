@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Consumer Module: Decoupling of Services via Exports and SNS'
+
+Parameters:
+    SNSTopicImport:
+        Type: String
+        Description: Import of the SNS Arn from another stack
+        Default: sns-example-trigger-lambda-producer-snsTopic
+
+
+Globals:
+    Function:
+        Timeout: 3
+        Runtime: nodejs8.10
+
+
+Resources:
+
+    EventReceiver:
+        Type: AWS::Serverless::Function
+        Properties:
+            CodeUri: src/
+            Handler: app.lambdaHandler
+            Events:
+                SNSTopic:
+                    Type: SNS
+                    Properties:
+                        Topic: 
+                            Fn::ImportValue:
+                                !Ref SNSTopicImport
+
+
+    

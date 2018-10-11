@@ -1,0 +1,29 @@
+{
+  "name": "hello_world",
+  "version": "1.0.0",
+  "description": "hello world sample for NodeJS",
+  "main": "src/index.js",
+  "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
+  "author": "SAM CLI",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
+  "scripts": {
+    "test": "node ./node_modules/.bin/tape ./src/test/*.test.js",
+    "test-coverage": "nyc node ./node_modules/.bin/tape ./test/*.test.js",
+    "lint": "eslint ./",
+    "precommit": "npm run lint && npm test",
+    "prepush": "echo There should be additional layer of checks",
+    "folder": "rm -rf build && mkdir build",
+    "bucket": "aws s3api create-bucket --bucket sns-test-bucket-delete --region eu-west-1 --create-bucket-configuration LocationConstraint=eu-west-1",
+    "package": "aws cloudformation package --template-file template.yaml --output-template-file build/output.yaml --s3-bucket sns-test-bucket-delete",
+    "deploy": "aws cloudformation deploy --template-file build/output.yaml --stack-name sns-example-trigger-lambda-producer --capabilities CAPABILITY_NAMED_IAM",
+    "qd": "npm run folder && npm run package && npm run deploy",
+    "scotty": "aws s3 cp <local-path> s3://<bucket-name>"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "mocha": "^5.1.1"
+  }
+}
